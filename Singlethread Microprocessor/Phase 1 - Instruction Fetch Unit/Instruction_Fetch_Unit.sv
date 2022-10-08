@@ -6,7 +6,7 @@ module INS_FETCH_UNIT (pc_in_0, pc_in_1, wait_for_next_in, clock, reset, freeze_
 	
 	parameter reg_width = 32, bus_width = 32, pc_increment = 1, phases = 5;
 	
-	import MEMORY::read_address;
+	import MEMORY::read_ins_address;
 	
 	// ports
 	input logic [bus_width-1:0] pc_in_0;
@@ -62,7 +62,7 @@ module INS_FETCH_UNIT (pc_in_0, pc_in_1, wait_for_next_in, clock, reset, freeze_
 		if ((pc_wire[0]=='b0)||(pc_wire[0]=='b1)) begin
 			if (!(wait_for_next_in||jump)) begin
 				pc = pc_wire;
-				ins_wire = read_address(pc);
+				ins_wire = read_ins_address(pc);
 				@(negedge clock);
 				npc = pc+'b1;
 			end

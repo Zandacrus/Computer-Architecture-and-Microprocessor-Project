@@ -4,7 +4,7 @@
 
 module INS_FETCH_UNIT_TB ();
 	
-	import MEMORY::write_data, MEMORY::read_address;
+	import MEMORY::write_ins_data;
 	
 	logic [31:0] pc_in_0;
 	logic [31:0] pc_in_1;
@@ -153,7 +153,7 @@ module INS_FETCH_UNIT_TB ();
 		
 		initial_pc = 'd14;
 		
-		for (int i=16; i>=0; i--) write_data(initial_pc+(16-i), ins_set[i]);
+		for (int i=16; i>=0; i--) write_ins_data(initial_pc+(16-i), ins_set[i]);
 		
 	end
 	
