@@ -12,9 +12,8 @@ module INS_FETCH_UNIT_TB ();
 	logic 		 communication_enable;
 	logic 		 wait_for_next;
 	logic 		 clock;
-	logic 		 reset;
-	logic 		 freeze_in;
 	logic 		 freeze_out;
+	logic 		 freeze_pc_out;
 	logic 		 cu_enable;
 	logic [31:0] instruction;
 	logic [31:0] npc;
@@ -24,8 +23,8 @@ module INS_FETCH_UNIT_TB ();
 	
 	logic [16:0][31:0] ins_set;
 	
-	INS_FETCH_UNIT ins_fetcher (.pc_in_0(pc_in_0), .pc_in_1(pc_in_1), .wait_for_next_in(wait_for_next), .clock(clock), .reset(reset), 
-								.freeze_in(freeze_out), .freeze_out(freeze_in), .npc_out(npc), .communication_enable_out(communication_enable), 
+	INS_FETCH_UNIT ins_fetcher (.pc_in_0(pc_in_0), .pc_in_1(pc_in_1), .wait_for_next_in(wait_for_next), .clock(clock),
+								.freeze_in(freeze_out), .freeze_pc_in(freeze_pc_out), .npc_out(npc), .communication_enable_out(communication_enable), 
 								.communication_signal_out(communication_signal), .cu_enable_out(cu_enable), .ins_out(instruction));
 	
 	//
@@ -36,11 +35,11 @@ module INS_FETCH_UNIT_TB ();
 	
 	assign pc_in_1 = initial_pc;
 	
-	initial $monitor({	"[%0t ns, clock_cycle = %0d] pc_in_0 = %b, pc_in_1 = %b, pc_choice = %b, pc = %0d, ins_wire = %b,\n",
-						"wait_for_next_in = %b, clock = %b, reset = %b, freeze_in = %b, freeze_out = %b, npc_out = %0d,\n",
+	initial $monitor({	"[%0t ns, clock_cycle = %0d] pc_in_0 = %b, pc_in_1 = %b, pc_choice = %b, pc = %0d,\n",
+						"ins_wire = %b, wait_for_next_in = %b, clock = %b, freeze_in = %b, npc_out = %0d,\n",
 						"communication_enable_out = %b, communication_signal_out = %b, cu_enable_out = %b, ins_out = %b\n"}, 
-						$time, clock_cycles, ins_fetcher.pc_in_0, ins_fetcher.pc_in_1,  ins_fetcher.pc_choice_signal, ins_fetcher.pc, ins_fetcher.ins_wire,
-						ins_fetcher.wait_for_next_in, ins_fetcher.clock, ins_fetcher.reset, ins_fetcher.freeze_in, ins_fetcher.freeze_out, ins_fetcher.npc_out, 
+						$time, clock_cycles, ins_fetcher.pc_in_0, ins_fetcher.pc_in_1,  ins_fetcher.pc_choice_signal, ins_fetcher.pc, 
+						ins_fetcher.ins_wire, ins_fetcher.wait_for_next_in, ins_fetcher.clock, ins_fetcher.freeze_in, ins_fetcher.npc_out, 
 						ins_fetcher.communication_enable_out, ins_fetcher.communication_signal_out, ins_fetcher.cu_enable_out, ins_fetcher.ins_out);
 	//
 		
@@ -58,20 +57,6 @@ module INS_FETCH_UNIT_TB ();
 			@(negedge cu_enable);
 			freeze_out = 'b1;
 		end
-	end
-	
-	always begin // From Control Unit
-		@(posedge freeze_in);
-		$display("[%0t ns, clock_cycle = %0d] From CU: Jump signal recieved.\nfreeze_in = %b, freeze_out = %b", $time, clock_cycles, freeze_in, freeze_out);
-		freeze_out <= 'b1;
-		
-		@(posedge clock); 
-		// Reg Fetch Phase
-		@(posedge clock);
-		// Execution Phase
-		@(posedge clock);
-		//Memory Phase
-		freeze_out <= 'b0;
 	end
 	
 	always begin // From Communication Unit
@@ -128,6 +113,7 @@ module INS_FETCH_UNIT_TB ();
 	// From Control Unit
 		clock = 'b0;
 		freeze_out = 'b1;
+		freeze_pc_out = 'b0;
 	// From Communication Unit
 		wait_for_next = 'b0;
 	// Writing instructions to memory
@@ -136,7 +122,7 @@ module INS_FETCH_UNIT_TB ();
 			'b011000_01010_01010_00000_00000_111000,
 			'b001010_01010_01010_00000_00000_111000,
 			'b000000_01010_01010_00000_00000_111000,
-			'b101010_01010_01010_00000_00000_111000, // jump
+			'b101010_01010_01010_00000_00000_111000,
 			'b000000_01010_01010_00000_00000_111000,
 			'b010101_01010_01010_00000_00000_111000,
 			'b011100_01010_01010_00000_00000_111000,
