@@ -29,10 +29,11 @@ module INS_FETCH_UNIT (pc_in_0, pc_in_1, wait_for_next_in, clock, freeze_in, fre
 	logic [reg_width-1:0] pc;
 	logic [reg_width-1:0] npc;
 	logic [reg_width-1:0] im;
+	wor ins_checker_wait;
 	
 	MUX #(bus_width) mux (.in_0(pc_in_0), .in_1(pc_in_1), .signal(pc_choice_signal), .out(pc_wire));
 	
-	CHECK_INS #(bus_width, phases) ins_checker (.ins_in(ins_wire), .clock(clock), .wait_for_next_in(wait_for_next_in),
+	CHECK_INS #(bus_width, phases) ins_checker (.ins_in(ins_wire), .clock(clock), .wait_for_next_in(wait_for_next_in|freeze_pc_in),
 												.ins_out(im_wire), .signal_out(communication_signal_out), .pc_choice_out(pc_choice_signal), 
 												.cu_enable_out(cu_enable_out), .communication_enable_out(communication_enable_out));
 	//
@@ -51,7 +52,7 @@ module INS_FETCH_UNIT (pc_in_0, pc_in_1, wait_for_next_in, clock, freeze_in, fre
 				pc = pc_wire;
 				ins_wire = read_ins_address(pc);
 				@(negedge clock);
-				npc = pc+pc_increment;
+				#2 npc = pc+pc_increment;
 			end
 		end
 	end
@@ -62,7 +63,7 @@ module INS_FETCH_UNIT (pc_in_0, pc_in_1, wait_for_next_in, clock, freeze_in, fre
 		if ((im_wire[0]=='b0)||(im_wire[0]=='b1)) begin
 			if (!freeze_in) begin
 				@(negedge clock);
-				#1
+				#6
 				im <= im_wire;
 			end
 		end

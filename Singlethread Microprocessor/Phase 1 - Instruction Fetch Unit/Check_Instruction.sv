@@ -26,7 +26,8 @@ module CHECK_INS (ins_in, clock, wait_for_next_in, signal_out, ins_out, pc_choic
 	
 	always begin 
 		@(posedge clock);
-		#3
+		@(negedge clock);
+		#5
 		if (!wait_for_next_in) begin
 			priority if (ins_in[bus_width-1:bus_width-6]=='b111111) begin
 				unique0 if (ins_in[bus_width-7:bus_width-8]=='b10) begin

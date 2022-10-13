@@ -36,10 +36,10 @@ module INS_FETCH_UNIT_TB ();
 	assign pc_in_1 = initial_pc;
 	
 	initial $monitor({	"[%0t ns, clock_cycle = %0d] pc_in_0 = %b, pc_in_1 = %b, pc_choice = %b, pc = %0d,\n",
-						"ins_wire = %b, wait_for_next_in = %b, clock = %b, freeze_in = %b, npc_out = %0d,\n",
+						"ins_wire = %b, wait_for_next_in = %b, clock = %b, freeze_in = %b, freeze_pc_in = %b, npc_out = %0d,\n",
 						"communication_enable_out = %b, communication_signal_out = %b, cu_enable_out = %b, ins_out = %b\n"}, 
 						$time, clock_cycles, ins_fetcher.pc_in_0, ins_fetcher.pc_in_1,  ins_fetcher.pc_choice_signal, ins_fetcher.pc, 
-						ins_fetcher.ins_wire, ins_fetcher.wait_for_next_in, ins_fetcher.clock, ins_fetcher.freeze_in, ins_fetcher.npc_out, 
+						ins_fetcher.ins_wire, ins_fetcher.wait_for_next_in, ins_fetcher.clock, ins_fetcher.freeze_in, ins_fetcher.freeze_pc_in, ins_fetcher.npc_out, 
 						ins_fetcher.communication_enable_out, ins_fetcher.communication_signal_out, ins_fetcher.cu_enable_out, ins_fetcher.ins_out);
 	//
 		
@@ -133,14 +133,22 @@ module INS_FETCH_UNIT_TB ();
 			'b001010_01010_01010_00000_00000_111000,
 			'b001010_01010_01010_00000_00000_111000,
 			'b001010_01010_01010_00000_00000_111000,
-			'b111111_11_0_0000_0000_0000_0000_0000000,
+			'b111111_11_0_0000_0000_0000_0000_0000000, // stop
 			'b111111_00_0_0000_0000_0000_0000_0000000 // end
 		};
 		
 		initial_pc = 'd14;
 		
 		for (int i=16; i>=0; i--) write_ins_data(initial_pc+(16-i), ins_set[i]);
-		
+		// From Control Unit (In case of Read after Write hazard)
+		repeat(9) @(posedge clock);
+		#2
+		freeze_pc_out = 'b1;
+		freeze_out = 'b1;
+		repeat(3) @(negedge clock);
+		#1
+		freeze_pc_out = 'b0;
+		freeze_out = 'b0;
 	end
 	
 endmodule:INS_FETCH_UNIT_TB
