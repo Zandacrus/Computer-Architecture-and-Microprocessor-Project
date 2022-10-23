@@ -5,7 +5,7 @@ Team mates: Amandeep Singh, Arkanil Paul, Manisha, Pavan Karthik, Swayam Pal, Te
 	
   
   
-  Operation		                                          Assembly Code
+        Operation		                                  Assembly Code
 		
 	$d <-- $s + $t 		                                  add $d, $s, $t;
 			
